@@ -61,7 +61,7 @@ www       ((www\.)?)
 name      ([a-z0-9\-\.]+)
 dot       (\.)
 domain    ([a-z]+)
-path      \/?[a-z0-9\?\/\-\_]*
+path      \/?[a-zA-Z0-9\?\/\-\_\&\.\=\;]*
 url       ({schema}{www}{name}{dot}{domain}{path})
 
 %{
