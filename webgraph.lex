@@ -51,6 +51,9 @@ struct Stream{
 
 std::set<std::string> urls;
 unsigned int total_urls = 0;
+unsigned int total_resources = 0;
+unsigned int total_images = 0;
+unsigned int total_web = 0;
 
 //------------------------------------------------------------------------------
 
@@ -63,6 +66,9 @@ dot       (\.)
 domain    ([a-z]+)
 path      \/?[a-zA-Z0-9\?\/\-\_\&\.\=\;]*
 url       ({schema}{www}{name}{dot}{domain}{path})
+url_res   ({url}(.js|.css){path})
+url_img   ({url}(.jpg|.jpeg|.png|.gif|.ico){path})
+url_web   ({url}(.html|.php|.asp)?{path})
 
 %{
 //------------------------------------------------------------------------------
@@ -72,12 +78,18 @@ url       ({schema}{www}{name}{dot}{domain}{path})
 
 %%
 
-{url} {
+{url_res} {
+  total_resources++;
+}
+
+{url_img} {
+  total_images++;
+}
+
+{url_web} {
   std::string url_str = yytext;
-  if(url_str.back()=='/')
-    url_str.pop_back();
   urls.insert(yytext);
-  total_urls++;
+  total_web++;
 }
 
 %%
@@ -90,8 +102,15 @@ int yywrap(void){
   /*
     Prints the total number of URLs found.
   */
+
+  total_urls = total_web + total_images + total_resources;
+
   std::cout << "Different URLs: " << urls.size() << std::endl;
   std::cout << "Total URLs: " << total_urls << std::endl;
+
+  std::cout << "Total web: " << total_web << std::endl;
+  std::cout << "Total images: " << total_images << std::endl;
+  std::cout << "Total resources: " << total_resources << std::endl;
 }
 
 //------------------------------------------------------------------------------
