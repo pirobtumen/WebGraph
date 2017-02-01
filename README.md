@@ -5,7 +5,7 @@ Web Graph is a program that finds relationships between web pages.
 It downloads a web page, extract the urls and follow those links in order
 to generate connections between the webs.
 
-It's made in C++/Lex for a university project.
+It's made with C++ and Lex for a university project.
 
 ## Dependencies
 - C++ (g++)
@@ -15,14 +15,17 @@ It's made in C++/Lex for a university project.
 ## Usage
 
 $ make
-$ ./webgraph <url>
+$ ./webgraph <url> <depth>
 
-- level: number of links to follow (depth).
 - url: start url.
-
-Example:
-$ ./webgraph http://www.google.com
+- depth: number of links to follow (depth).
 
 ## Output
 
+TXT File where each line is:
+
+<downloaded url> <scrapped urls>
+
 ## Visualization
+
+Soon :)

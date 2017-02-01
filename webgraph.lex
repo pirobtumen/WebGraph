@@ -7,17 +7,21 @@
   It downloads a web page, extract the urls and follow those links in order
   to generate connections between the webs.
 
-  It's made in C++/Lex for a university project.
+  It's made with C++ and Lex for a university project.
 
   Dependencies:
+    - libcurl
+    - flex
 
   Usage:
+    - make
+    - ./webgraph <url> <depth>
 
-  Output:
-
-  Visualization:
-
-  Alberto Sola Comino - 2016
+  Output: TXT File
+  Each line: <downloaded url> <scrapped urls>
+	
+  LICENSE:  MIT
+  AUTHOR:   Alberto Sola, 2016 - 2017
 */
 
 %{
@@ -29,6 +33,7 @@
 %{
 
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <cstring>
 #include <string>
@@ -50,6 +55,9 @@ struct Stream{
 
 //------------------------------------------------------------------------------
 
+const char URL_SEPARATOR = ' ';
+
+std::ofstream output("data.txt");
 std::queue<std::string> url_queue;
 std::set<std::string> visited_urls;
 std::set<std::string> urls;
@@ -97,14 +105,14 @@ url_web   ({url}(.html|.php|.asp)?{path}?)
 %%
 
 {url_res} {
-  // TODO: Write
-  //urls.insert(yytext);
+  output << yytext;
+  output << URL_SEPARATOR;
   num_resources++;
 }
 
 {url_img} {
-  // TODO: Write
-  //urls.insert(yytext);
+  output << yytext;
+  output << URL_SEPARATOR;
   num_images++;
 }
 
@@ -113,6 +121,9 @@ url_web   ({url}(.html|.php|.asp)?{path}?)
 
   // URLs found
   urls.insert(yytext);
+
+  output << url_str;
+  output << URL_SEPARATOR;
 
   num_web++;
 }
@@ -178,9 +189,7 @@ void get_url(const std::string & url, Stream * stream){
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, stream);
-
     curl_easy_perform(curl);
-
     curl_easy_cleanup(curl);
   }
   else
@@ -210,7 +219,7 @@ void scrap_url(const std::string & url){
     std::cout << "Stream size: \t\t" << stream.size << std::endl;
 
     // Open stream in memory
-    data = fmemopen(stream.data,stream.size,"r");;
+    data = fmemopen(stream.data, stream.size,"r");;
 
     // Change LEX input
     yyin = data;
@@ -241,18 +250,9 @@ void scrap_url(const std::string & url){
 
 //------------------------------------------------------------------------------
 
-int main(int argc, char ** argv){
+void scrap_levels(const std::string & start_url){
   std::set<std::string>::iterator element;
-  std::string url;
-
-  if(argc != 3){
-    //TODO: print help
-    exit(-1);
-  }
-  else{
-    url = argv[1];
-    max_depth = std::atoi(argv[2]);
-  }
+  std::string url = start_url;
 
   // Add the first URL
   url_queue.push(url);
@@ -269,6 +269,10 @@ int main(int argc, char ** argv){
     // Get next URL
     url = url_queue.front();
     url_queue.pop();
+
+    // Write it to the file
+    output << url;
+    output << URL_SEPARATOR;
 
     std::cout << "URL: \t\t\t" << url << std::endl;
 
@@ -303,7 +307,11 @@ int main(int argc, char ** argv){
         next_depth_limit = 0;
         depth_count = 0;
       }
+
     }
+
+    // End output line
+    output << std::endl;
 
     // Update stats
     // -------------------------------------------------------------------------
@@ -323,7 +331,6 @@ int main(int argc, char ** argv){
 
     // Save data and reset
     // -------------------------------------------------------------------------
-    // TODO: Write to file
     urls.clear();
   }
 
@@ -338,5 +345,20 @@ int main(int argc, char ** argv){
   std::cout << "Total web: \t" << total_web << std::endl;
   std::cout << "Total images: \t" << total_images << std::endl;
   std::cout << "Total resources: " << total_resources << std::endl;
+}
 
+//------------------------------------------------------------------------------
+
+int main(int argc, char ** argv){
+
+  if(argc != 3){
+    //TODO: print help
+    exit(-1);
+  }
+  else
+    max_depth = std::atoi(argv[2]);
+
+  scrap_levels(argv[1]);
+
+  output.close();
 }
