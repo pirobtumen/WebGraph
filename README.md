@@ -9,9 +9,9 @@ It's made with C++ and Lex for a university project.
 
 The output can be preprocessed with 'graph.py' in order to generate a graph, but because of there is a lot of data, if you want to display the graph it would be necessary to extract the most relevant data.
 
-Example of data from Reddit:
+Example of data from Xataka:
 
-
+![Xataka Graph](https://raw.githubusercontent.com/pirobtumen/pirobtumen.github.io/master/repos/WebGraph/GRAPH1.png)
 
 ## Dependencies
 - C++ (g++)
